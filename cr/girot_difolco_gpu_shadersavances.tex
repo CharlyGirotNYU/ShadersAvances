@@ -24,12 +24,22 @@
 
 \section{Parallax Mapping - Donner l'illusion du relief}
 
-Avant : utilisation de textures \textit{colorées} appliquées directement sur un maillage. Exemple : dessiner un mur de briques comme sur la Fig.\ref{brique}
+\textbf{Avant} : utilisation de textures \textit{colorées} appliquées directement sur un maillage. Exemple : dessiner un mur de briques comme sur la Fig.\ref{brique}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{figures/brick_diffuse.png}\label{briques}
 \caption{Images à reconstruire sous la forme d'un panorama}
+\end{figure}
+
+
+\textbf{Désormais} : utilisation des textures pour d'autres informations et utilisations (modifications de normales Fig\ref{normales}, stockage d'informations de profondeurs Fig\ref{profondeur}). 
+
+\begin{figure}[H]
+\centering
+\subfigure[]{\label{normales} \includegraphics[width=0.3\textwidth]{figures/brick_normales.png}}
+\subfigure[]{\label{profondeur} \includegraphics[width=0.3\textwidth]{figures/brick_profondeur.png}}
+\caption{Textures contenant les informations de normales (a) et de profondeur (b)}
 \end{figure}
 
 
