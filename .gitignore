@@ -1,0 +1,10 @@
+*.o
+*.aux
+*.log
+*.synctex.gz
+*.d
+
+./SCHOOL/marching-cubes/marching-cubes
+./SCHOOL/parallax/parallax
+./HOME/parallax/parallax
+./HOME/marching-cubes/marching-cubes

@@ -182,7 +182,7 @@ static void display_callback()
   view.set_look_at(eye, vec3(0,0,0), vec3(0,1,0));
   matrix model;
   model.rotate(-30, vec3(1,0,0));
-  model.rotate(glutGet(GLUT_ELAPSED_TIME) / 100.0, vec3(0, 0, 1)); // Rotates the quad to show parallax mapping works in all directions
+  //model.rotate(glutGet(GLUT_ELAPSED_TIME) / 100.0, vec3(0, 0, 1)); // Rotates the quad to show parallax mapping works in all directions
 
   // update the uniforms
   shader->activate();
@@ -191,8 +191,8 @@ static void display_callback()
   shader->set("model", model);
   shader->set("light_pos", light_pos);
   shader->set("view_pos", eye);
-//  shader->set("height_scale", height_scale);
-//  shader->set("parallax", parallax_mapping);
+  shader->set("height_scale", height_scale);
+  shader->set("parallax", parallax_mapping);
 
   // Affectation des textures
   glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, texture_diffuse);
@@ -226,7 +226,7 @@ static void init()
   shader->activate();
   shader->set("diffuse_tex", 0);
   shader->set("normal_tex", 1);
-  // shader->set("height_tex", 2); // pour le parallax
+   shader->set("height_tex", 2); // pour le parallax
 
   init_quad();
   glEnable(GL_DEPTH_TEST);
