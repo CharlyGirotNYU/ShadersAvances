@@ -44,9 +44,11 @@ vec4 Noise_MQ_signed(vec3 uvw, sampler3D noiseTex)
 float density(vec3 ws)
 { // C'est cette fonction qui définit la "forme"
 
-  // return 1. - length(ws); //CYLINDER
-//   vec2 q = vec2(length(ws.xz)-t.x,ws.y); // TORUS
-//   return length(q)-0.5*t.y;
+   float f = 0;
+   //vec2 t = vec2(0.5,0.5);
+   //f = 1. - length(ws); //CYLINDER
+   //vec2 q = vec2(length(ws.xz)-t.x,ws.y); // TORUS
+   //f = length(q)-0.5*t.y;
 //     vec3 a; vec3 b; float r;
 //     r=1.0;
 //     a = vec3(1.0,0.0,0.5);
@@ -69,7 +71,7 @@ float density(vec3 ws)
     pillar[2] = vec2(-0.4,-0.4);
     pillar[3] = vec2(-0.4,0.4);
 
-    float f = 0;
+    
     
     for(int k=0; k<4; k++)
     {
@@ -81,6 +83,7 @@ float density(vec3 ws)
 //     vec2 v = vec2(cos(ws.z), sin(ws.z));
 //     f += dot(v, ws.xy);
     f += cos(ws.z)+sin(ws.x);
+
     
     return f;
 }

@@ -54,13 +54,14 @@ void main(void)
   v = normalize(v);
 
   vec4 blended_color;
-//   blended_color = vec4(1.,0.,0.,1.);
-blended_color = vec4(1.0,1.0,1.0,1.0);
+   blended_color = vec4(1.,0.,0.,1.);
+//blended_color = vec4(1.0,1.0,1.0,1.0);
 
   vec4 diffuse  = blended_color * max(0.0, dot(n, s.xyz)) * 0.8;
   specular = pow(max(0.0, dot(r, v)), 10.0);
   specular = clamp(specular, 0.0, 1.0);
 
   float occ_light = clamp(2.0 - 2.0 * vf_occlusion, 0.0, 1.0);
-  color = /*occ_light * occ_light * */texcolor*(blended_color * 0.2 + 0.6 * diffuse + 0.3 * vec4(vec3(specular), 1.0));
+  //color = /*occ_light * occ_light * */texcolor*(blended_color * 0.2 + 0.6 * diffuse + 0.3 * vec4(vec3(specular), 1.0));
+color = (blended_color * 0.2 + 0.6 * diffuse + 0.3 * vec4(vec3(specular), 1.0));
 }

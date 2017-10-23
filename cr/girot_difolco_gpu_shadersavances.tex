@@ -14,10 +14,18 @@
 \usepackage[]{algorithm2e}
 \usepackage{xcolor}
 \usepackage[]{float}
+\usepackage{tikz}
 \title{Compte Rendu - TP ETI5-IMI \\ \textit{Shaders avancés et Marching Cubes}}
 \author{Di Folco Maxime - Girot Charly}
 \date{27/10/2017}
 
+
+\tikzset{my arrow/.style={
+  blue!60!black,
+  -latex
+  }
+  }
+  
 
 \begin{document}
 \maketitle
@@ -116,25 +124,74 @@ Critique des limitations du parallax mapping.
 
 
 \section{Marching Cubes}
+
+%% En vrai je sais pas si faut vraiment répondre aux question une par une, c'est trop bizarre et j'ai même pas l'impression qu'il y ait de lien entre les questions ... 
+\subsection{Présentation Générale}
 C'est quoi l'algo des marchings cubes
 
 Question 5 : Repérez quel groupe de shaders et quelle partie du code C++ sont liés à chaque étape. Essayez de faire un
 schéma indiquant comment les différentes étapes echangent des données via des FBO ou des TF.
+\begin{center}
+\begin{tikzpicture}
+
+
+\draw[step=0.5cm,white,very thin] (-6,-5) grid (6,10) ;
+\fill[blue!40!white] (-2,10) rectangle (2,9);
+\node[above] at (0,9.25){Build Density Verrtex};
 
 
 
+\fill[blue!40!white] (-2,8.5) rectangle (2,7.5) ;
+\node[above] at (0,7.75){Build Density Geometry };
+
+\fill[blue!40!white] (-2,7) rectangle (2,6);
+\node[above] at (0,6.25){Build Density Fragment };
+
+
+\fill[blue!40!white] (-2,5.5) rectangle (2,4.5);
+\node[above] at (0,4.75){List triangle vertex };
+
+\fill[blue!40!white] (-2,4) rectangle (2,3);
+\node[above] at (0,3.25){List Triangle geom};
+
+\fill[blue!40!white] (-2,2.5) rectangle (2,1.5);
+\node[above] at (0,1.75){List Triangle fragment };
+
+\fill[blue!40!white] (-2,1) rectangle (2,0);
+\node[above] at (0,0.25){Generer Vertices Vertex };
+
+\fill[blue!40!white] (-2,-0.5) rectangle (2,-1.5);
+\node[above] at (0,-1.25){Generer Vertices Geom};
+
+\fill[blue!40!white] (-2,-2) rectangle (2,-3);
+\node[above] at (0,-2.75){Gen Vertices Fragment };
+
+\fill[blue!40!white] (-2,-3.5) rectangle (2,-4.5);
+\node[above] at (0,-4){Render Vertex  };
+\node[above] at (0,-4.5){+ Render Fragment};
+
+
+\node[above] at (0,-5){Ordre d'utilisation des shaders - Ajouter Fleches et explications };
+\end{tikzpicture}
+\end{center}
+
+\subsection{Analyse Du code}
 Question 6 : Lisez la documentation de la fonction glDrawArraysInstanced , que réalise cette fonction ? Aurait-on pu s’en
 passer ? Quelle est l’utilisation plus classique de cette fonction ?
 
+De la même manière que glDrawArrays permet de "dessiner/rendre" une primitive (un triangle dans notre cas), glDrawArraysInstances permet de synthétiser une série instanciée de primitives. On aurait donc pu s'en passer en utilisant glDrawArrays dans une boucle avec itération des indices de chaque primitive (ce qui est fait automatiquement avec cette fonction). 
+
+Question 7 : Comment s’utilise la fonction glActiveTexture ? 
 
 
-Question 7 : Comment s’utilise la fonction glActiveTexture ? Déjà demandé son rôle plus haut, peut être répondre à tout en même temps
-
-
+\subsection{Amélioration de l'algorithme}
 
 Question 8 : Dans les shaders, on trouve des variables de type isampler2D et d’autres de type sampler2D. Quelle est la
-différence entre ces deux types ? (c'est simplement entier ou non ? ) Que réalise la fonction texelFetch ?
+différence entre ces deux types ?  Que réalise la fonction texelFetch ?
 
+Les documentations font réferences à \textit{g}sampler2d ou g est remplacé par rien, u ou i. Rien signifie que le sampler2D contenant des coordonnées de textures sera exprimé en float, i par des entiers signés et u par des entiers non signés. 
+
+TexelFetch recherche le texel (pixel de texture) correspondant à la coordonnées de texture qui lui a été fournit et à la texture. 
 
 Question 9 : Corrigez le calcul des normales en supposant que sa direction est donnée par le gradient de la fonction de
 densité. Quel fichier avez-vous modifié pour cela ?
@@ -144,6 +201,38 @@ densité. Quel fichier avez-vous modifié pour cela ?
 L’aspect crénelé de la sphère vient du fait que la position des vertex est toujours choisie au milieu des arètes des cubes.
 Une meilleure approche consiste à réaliser une interpolation linéraire pour choisir cette position.
 Question 10 : Réalisez cette interpolation de manière à obtenir une sphère bien lisse comme celle de la figure 9.
+
+\begin{figure}[H]
+\centering
+\subfigure[]{\label{mc0} \includegraphics[width=0.3\textwidth]{figures/mc0.png}}
+\subfigure[]{\label{mcNormalResult} \includegraphics[width=0.3\textwidth]{figures/mcnorm.png}}
+\subfigure[]{\label{mcInterResult} \includegraphics[width=0.3\textwidth]{figures/mcnorminterp.png}}
+\caption{Marching Cubes Original (a) ; Calcul des normales fonction du gradient de la fonction de densité (b); Interpolation linéaire de placement des vertex par rapport aux arrètes (c)}
+\end{figure}
+
+
+\subsection{Fonction de densité}
+
+Images des différentes fonctions de densité qu'on peut réaliser + celle de la plus intéressante qu'on ait 
+
+\begin{figure}[H]
+\centering
+\subfigure[]{\label{mc0} \includegraphics[width=0.3\textwidth]{figures/mcnorminterp.png}}
+\subfigure[]{\label{mcNormalResult} \includegraphics[width=0.3\textwidth]{figures/torus.png}}
+\subfigure[]{\label{mcInterResult} \includegraphics[width=0.3\textwidth]{figures/chelouA.png}}
+\caption{Marching Cubes avec différentes fonctions de densite : Boule (a), Torus (b), Création de roches (c)}
+\end{figure}
+
+\subsection{Amélioration graphique \& Textures}
+
+
+Question 12 : Mettez en place le calcul pondéré des textures par les normales pour obtenir une image du genre de la
+figure 18.
+
+
+
+\subsection{Combinaison Parallax Mapping + Marching Cubes}
+
 
 \bibliographystyle{plain}
 \bibliography{bibliography.bib}

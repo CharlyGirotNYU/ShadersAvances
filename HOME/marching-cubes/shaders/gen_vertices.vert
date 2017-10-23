@@ -41,6 +41,7 @@ vec3 vertexInterp(vec3 v0, float l0, vec3 v1, float l1)
 {
   // À modifier pour une vraie interpolation
   return (v0 + v1) / 2;
+  //return (l1*v0 - l0*v1)/(l1-l0);
 }
 
 float text_density(vec3 pos)
@@ -51,8 +52,11 @@ float text_density(vec3 pos)
 vec3 calc_normal(vec3 pos)
 {
   // À modifier pour avoir une vraie normale
+  float d = 1.0/48.0; //div par 48 pour se décaler d'un fragment à chaque fois selon l'axe sur lequel on est
   vec3 grad = vec3(1.); 
-
+  //grad.x = text_density( pos + vec3( d, .0, .0)) - text_density( pos+ vec3(-d, .0, .0));
+  //grad.y = text_density( pos + vec3( .0, d, .0)) - text_density( pos+ vec3( .0,-d, .0));
+  //grad.z = text_density( pos + vec3( .0, .0, d)) - text_density( pos+ vec3( .0, .0,-d));
   return normalize(grad);
 }
 
