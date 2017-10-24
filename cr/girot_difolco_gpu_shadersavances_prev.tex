@@ -30,9 +30,6 @@
 \begin{document}
 \maketitle
 
-%% Explication des noramles, Relecture partie 1 (à completer)
-%% Toutes les images d'amelirotaion graphique des textures
-
 \section{Parallax Mapping - Donner l'illusion du relief}
 \subsection{Utilisation des textures de normales}
 \textbf{Avant} : utilisation de textures \textit{colorées} appliquées directement sur un maillage. Exemple : dessiner un mur de briques comme sur la Fig.\ref{briques}
@@ -54,7 +51,9 @@
 \end{figure}
 
 
-Dans un premier temps, on nous fourni un programme qui implémente le normal mapping. On peut remarquer que la lumière est fixe mais les ombres évoluent en fonction de la rotation de l'objet. Il est possible de distinguer un relief entre les briques et leur support (le mur). Cela provient du fait que dans la méthode normal mapping les normales ne sont plus seulement orientés vers nous selon l'axe $z$ mais sont désormais liées aux axes $x$,$y$ et $z$ de la surface en fonction de la carte des normales representée Fig\ref{normales} où la composante rouge indique une modification de la normale selon l'axe $x$, verte pour l'axe $y$ et bleue pour l'axe $z$. Les normales ne sont ainsi plus toutes orientées dans le même sens selon la surface de l'objet, mais orientées différemment selon chaque fragment constituant notre objet. On obtient ainsi grâce à l'illumination des surfaces beaucoup plus détaillés.
+Q1\\
+Première implémentation : Parallax mapping implementé avec la carte des normales, comment est ce que la lumière interagit avec la surface : 
+La lumière est fixe mais les ombres évoluent en fonction de la rotation de l'objet. Il est possible ed distinguer un relief entre les briques et leur support (le mur). Cela provient du fait que les normales ne sont plus seulement orientés vers nous selon l'axe $z$ mais sont désormais liées aux axes $x$,$y$ et $z$ de la surface en fonction de la carte des normales representée Fig\ref{normales} où la composante rouge indique une modification de la normale selon l'axe $x$, verte pour l'axe $y$ et bleue pour l'axe $z$. Les normales ne sont ainsi plus toutes orientées dans le même sens selon la surface de l'objet, mais orientées différement selon chaque fragment constituant notre objet. On obtient ainsi grace à l'illumination des surfaces beaucoup plus détaillés.
 
 \begin{figure}[H]
 \centering
@@ -64,33 +63,29 @@ Dans un premier temps, on nous fourni un programme qui implémente le normal map
 
 
 
-Dans cette méthode, les tangeantes bi-tangeantes sont calculées dans l'espace TBN (Tangeante, Bitangeante, Normal). Dans cet espace les normales pointent toujours approximativement vers la direction z positive. La direction initiale est alors indépendante de l'orientation du plan initial. Après avoir appliqué une transformation sur notre plan, nous pouvons en utilisant une matrice spécifique transformer les vecteurs normaux initiales en les orientant le long de la direction de la surface cartographiée finale grâce à l'indépendance de la direction initiale par rapport à l'orientation du plan initial.
 
-Pour simplifier nous aurions pu utiliser un simple normal mapping en orientant simplement la texture des normales selon la map. Les normales pointeraient alors vers en direction du plan normal du plan. Néanmoins, cela pose le problème suivant : il faut que les vecteurs normaux (qui pointent tous dans la même direction) et que la surface normale du plan auquel on applique la texture pointent dans la même direction pour obtenir un effet d'éclairage réaliste. Lorsque nous effectuons une transformation sur la position du plan normal, les vecteurs normaux ont été calculée selon une direction (celle de la map initiale) et donc pointeront toujours dans la même direction et pas en fonction de l'orientation du plan normal de la map transformée . L'éclairage n'aura donc pas l'air juste comme le montre la Fig \ref{lighting_problem}
+Q2\\
+fichier main.cpp, calcul des tangeantes et bitangeantes, comment simplifier ? 
+Les tangeantes bi-tangeantes sont calculées dans l'espace TBN (voir normal mapping pour ajouter des détails). Pour simplifier on aurait pu utiliser un simple normal mapping en utilisant la texture des normals en orientant simplement ces dernières selon la map mais cela pose le problème de ... pas tout compris au problème sur le site sauf que ca marche pas tout le temps en fonction de ...  fatigue. 
 
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.5\textwidth]{figures/lighting_problem.png}\label{lighting_problem}
-\caption{•}
-\end{figure}
-
-Dans ce programme, nous souhaitons pouvoir utiliser plusieurs texture avec d'autres informations d'utilisations comme la modification des normales et le stockage d'informations de profondeurs. Chaque texture sera stockée dans un indice GLTEXTUREn. En lisant le buffer courant activée et en sélectionnant la texture grâce à glActiveTexture(GLTEXTUREn)   nous pouvons relier la cible à la texture à l'aide glbindtexture(). Cela nous permet donc de pouvoir "jongler" entre les différentes structures. La fonction glActiveTexture(GLTEXTUREn) sélectionne la texture que les appels suivants affecteront jusqu'à l'activation d'une autre texture.
+Comment sont gérées les différentes textures ? Rôle de glActiveTexture().
+Chaque texture est stockée dans un indice GLTEXTUREn puis on lit le buffer courant activée à l'aide de glActiveTexture(GLTEXTUREn) à l'aide de glbindtexture();
 
 Q3\\  
-Rôle de chaque variable dans les shaders Vertex Shader : \\
-- in vec3 position; Sommet habituels \\
-- in vec3 normal; Normal données \\
-- in vec2 $tex_coords$; Coordonées de texture \\
-- in vec3 tangent; in vec3 bitangent; Tangeante et bitangeante - - calculés précédemment 
- \\
+Rôle de chaque variable dans les shaders
+Vertex Shader
+in vec3 position; Sommet habituels
+in vec3 normal; Normal données
+in vec2 $tex_coords$; Coordonées de texture
+in vec3 tangent; Tangeante et bitangeante calculés précédemment
+in vec3 bitangent;
 
-On calcule la matrice TBN avec les lignes de codes suivantes :\\ 
-out vec3 $vf\_frag\_pos$ = model * position ;\\
-out vec2 $vf\_tex_coords$;\\
-out vec3 $vf\_tangent\_light\_pos$ = TBN * $light\_pos$;\\
-out vec3 $vf\_tangent\_view\_pos$ = TBN * $view\_pos$;\\
-out vec3 $vf\_tangent\_frag\_pos$ = TBN * $vf\_frag_pos$;\\
+On calcule la matrice TBN 
+out vec3 $vf_frag_pos$ = model * position ;
+out vec2 $vf_tex_coords$;
+out vec3 $vf_tangent_light_pos$ = TBN * $light_pos$;
+out vec3 $vf_tangent_view_pos$ = TBN * $view_pos$;
+out vec3 $vf_tangent_frag_pos$ = TBN * $vf_frag_pos$;
 
 Fragment Shader : en fonction de la direction de la lumière, de la vue et des fragments tangeants on peut calculer les directions de la vue et de la lumière 
 En fonction des différentes textures envoyées (couleur (diffuse) et normales) et des coordonnées de texture, on peut calculer la couleur des fragments.
@@ -106,7 +101,7 @@ On utilise pas height tex car on fait du normal mapping pas du parallax mapping 
 
 
 \subsection{Ajout d'un effet de profondeur avec l'utilisation des cartes de hauteur}
-Modification des coordonnées de texture en fonction de la carte d'élévation et de la position de la vue. Explication géométrique de ce qu'on fait pour que donner cet effet de profondeur et du pourquoi ça marche mieux quand on a une vue rasante. 
+Modification des coordonnées de texture en fonction de la carte d'élévation et de la position de la vue. Explicqtion géométrique de ce qu'on fait pour que donner cet effet de profondeur et du pourquoi ça marche mieux quand on a une vue rasante. 
 
 On applique ensuite l'algorithme suivant pour ajouter l'effet de profondeur : 
 
@@ -132,14 +127,10 @@ Critique des limitations du parallax mapping.
 
 %% En vrai je sais pas si faut vraiment répondre aux question une par une, c'est trop bizarre et j'ai même pas l'impression qu'il y ait de lien entre les questions ... 
 \subsection{Présentation Générale}
-
-Une surface pourrait être décrite par une fonction densité qui à chaque point 3D associe une valeur de densité. Une valeur positive de densité correspondrait à un point de la surface solide et une valeur négative à un espace vide. Grâce au GPU, nous allons générer des "blocs" de terrain, et les subdiviser en sous-blocs de 32x32x32 appelés voxels. Chaque sommet de ce sous-bloc possède une valeur de densité. L'algorithme de marching cubes nous permet de générer les polygones corrects dans chaque voxels en fonction de la valeur de densité de chaque coin.
-
-%% PEut etre mettre une figure qui illustre ca 
+C'est quoi l'algo des marchings cubes
 
 Question 5 : Repérez quel groupe de shaders et quelle partie du code C++ sont liés à chaque étape. Essayez de faire un
 schéma indiquant comment les différentes étapes echangent des données via des FBO ou des TF.
-
 \begin{center}
 \begin{tikzpicture}
 
@@ -183,7 +174,6 @@ schéma indiquant comment les différentes étapes echangent des données via de
 \node[above] at (0,-5){Ordre d'utilisation des shaders - Ajouter Fleches et explications };
 \end{tikzpicture}
 \end{center}
-
 
 \subsection{Analyse Du code}
 Question 6 : Lisez la documentation de la fonction glDrawArraysInstanced , que réalise cette fonction ? Aurait-on pu s’en
