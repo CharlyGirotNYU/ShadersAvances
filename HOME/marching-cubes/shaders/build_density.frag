@@ -43,8 +43,37 @@ vec4 Noise_MQ_signed(vec3 uvw, sampler3D noiseTex)
 
 float density(vec3 ws)
 { // C'est cette fonction qui définit la "forme"
+    float f = 0;
+    
+     ws.yz   += 0.5*Noise_MQ_unsigned(ws/10,noiseVol0).xy 
+	    + 0.5*Noise_MQ_unsigned(ws/10,noiseVol1).xy
+	    + 0.5*Noise_MQ_unsigned(ws/10,noiseVol2).xy
+	    + 0.0*Noise_MQ_unsigned(ws/10,noiseVol3).xy;
+    vec2 pillar[4];
+    
+    pillar[0] = vec2(0.4,-0.8);
+    pillar[1] = vec2(0.4,1.0);
+    pillar[2] = vec2(-0.8,-0.4);
+    pillar[3] = vec2(-0.4,1.0);
 
-  return 1. - length(ws);
+    
+    
+    for(int k=0; k<4; k++)
+    {
+      f += 1 / length(ws.xy - pillar[k].xy) - 1;
+    }
+    f -= 1 / length(ws.xy) - 2;
+    f = f - pow(length(ws.xy), 3);
+    
+    vec2 v = vec2(cos(ws.z),sin(ws.z));
+    f += dot(v,ws.xy);
+    
+    f += cos(ws.z);
+    
+    return f;
+    
+
+    //return 1. - length(ws);
 }
 
 uniform vec3 offset;
