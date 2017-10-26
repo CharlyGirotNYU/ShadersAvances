@@ -1,5 +1,9 @@
 #version 330
 
+/*
+* Return a triplet of vertex indices corresponding to the index of the cubes for the configuration of the current cube 
+*/
+
 layout (points) in;
 layout (points, max_vertices = 5) out;
 

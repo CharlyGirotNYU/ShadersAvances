@@ -122,6 +122,7 @@ static void keyboard_callback(unsigned char key, int, int)
 {
   switch (key)
   {
+      //manipulation of height factor for the parallax effect 
     case 'E':
       height_scale -= 0.001;
       break;

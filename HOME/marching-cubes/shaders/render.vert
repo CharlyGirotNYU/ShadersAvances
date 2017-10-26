@@ -1,5 +1,9 @@
 #version 330
 
+
+/* 
+* Draw triangles computed by gen_vertices.fragment
+*/
 in vec4 position;
 in vec3 normal;
 

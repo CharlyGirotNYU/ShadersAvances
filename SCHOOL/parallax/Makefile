@@ -5,7 +5,7 @@ SOURCES := lib src
 INCLUDE := lib
 
 CXXFLAGS += -Wall -Wextra -O2 -ggdb3 -I../src/math -std=c++11
-LDFLAGS += -lglut -lGLEW -lGL  -L/usr/lib/nvidia-375 -pthread
+LDFLAGS += -lglut -lGLEW -lGL -pthread -L/usr/lib/nvidia-375 -pthread
 
 CPPFLAGS = $(foreach dir,$(INCLUDE),-I../$(dir))
 

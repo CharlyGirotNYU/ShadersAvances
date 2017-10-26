@@ -1,4 +1,8 @@
 #version 330
+/* 
+* Get the three vertex computed by gen_vertices.vert and form a triangle with it 
+*/
+
 
 layout (points) in;
 layout (triangle_strip, max_vertices = 3) out;

@@ -1,5 +1,10 @@
 #version 330
 
+
+/*
+*Chose in which case the current cube is between 0 and 255 (2⁸) to decide which vertex to chose to further draw a triangle
+*/
+
 //Volume data field texture
 uniform sampler3D dataFieldTex;
 

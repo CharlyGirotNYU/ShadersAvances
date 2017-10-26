@@ -546,7 +546,9 @@ static void init()
 
   marching_cube_gpu_setup();
 
-  glClearColor(.6, .7, .8, 0);
+  glClearColor(.6, .7, .8, 0); // Fond Bleu
+  //lClearColor(0, 0, 0, 0);//Fond Noir
+  
   glEnable(GL_DEPTH_TEST);
 
   glEnable(GL_CULL_FACE);

@@ -1,5 +1,5 @@
 // main.cpp
-//Coucou test
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -84,7 +84,7 @@ static void init_quad()
   bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
   bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
   bitangent2.normalize();
-
+  
 
   GLfloat vertices[] =
   {
@@ -122,6 +122,7 @@ static void keyboard_callback(unsigned char key, int, int)
 {
   switch (key)
   {
+      //manipulation of height factor for the parallax effect 
     case 'E':
       height_scale -= 0.001;
       break;
@@ -182,7 +183,7 @@ static void display_callback()
   view.set_look_at(eye, vec3(0,0,0), vec3(0,1,0));
   matrix model;
   model.rotate(-30, vec3(1,0,0));
-  //model.rotate(glutGet(GLUT_ELAPSED_TIME) / 100.0, vec3(0, 0, 1)); // Rotates the quad to show parallax mapping works in all directions
+  model.rotate(glutGet(GLUT_ELAPSED_TIME) / 100.0, vec3(0, 0, 1)); // Rotates the quad to show parallax mapping works in all directions
 
   // update the uniforms
   shader->activate();
@@ -224,9 +225,9 @@ static void init()
 
   // Set texture units 
   shader->activate();
-  shader->set("diffuse_tex", 0);
-  shader->set("normal_tex", 1);
-   shader->set("height_tex", 2); // pour le parallax
+  shader->set("diffuse_tex", GL_TEXTURE0); //Ou ecrire 0
+  shader->set("normal_tex", 1); //Correspond à GL_TEXTURE1
+  shader->set("height_tex", 2); // pour le parallax
 
   init_quad();
   glEnable(GL_DEPTH_TEST);

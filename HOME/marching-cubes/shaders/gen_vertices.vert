@@ -1,6 +1,15 @@
 #version 330
 
-//Volume data field texture
+/*
+* Get for each cube density of vertexes 
+* Interpolate vertex function of densities for each edge of the cube
+* generate for the current process traingle within the cube the 3 position of the vertex constituting this triangle 
+* Also, generate normals for each vertex
+* Also, manages occlusions 
+*/
+
+
+//Volume data field texture --> Les densités 
 uniform sampler3D dataFieldTex;
 
 uniform sampler1D poisson;
@@ -44,11 +53,13 @@ vec3 vertexInterp(vec3 v0, float l0, vec3 v1, float l1)
   return (l1*v0 - l0*v1)/(l1-l0);
 }
 
+// Compute Density at vertex of position pos
 float text_density(vec3 pos)
 {
   return texture(dataFieldTex, (pos + 1.0) / 2.0).r;
 }
 
+//Compute Normal of vertex at position pos
 vec3 calc_normal(vec3 pos)
 {
   // À modifier pour avoir une vraie normale

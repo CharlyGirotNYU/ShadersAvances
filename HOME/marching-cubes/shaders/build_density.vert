@@ -1,5 +1,5 @@
 #version 330
-
+//Build density shaders are computing density of each vertex 
 in vec2 v_position;
 
 out float layer;

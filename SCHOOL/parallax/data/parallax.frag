@@ -26,18 +26,20 @@ void main()
   
   //On récupère la hauteur en fonctoin de la texture et des coordonnées
   float height = texture(height_tex, tex_coords).r;
-  //Calcul du vectuer projection
+  //Calcul du vecteur projection
   vec2 p = view_dir.xy / view_dir.z * (height * height_scale);
+  
+  //Activation du parallax effect ou non, adaptaion des coordonnées de texture avec prise en compte de la projection parallax 
   if(parallax)
     tex_coords = tex_coords - p;
   
-  // Pour le parallax mapping, il faudra adapter les coordonnées de texture
+  
   
   // On laisse tomber les pixels qui sont en dehors de la texture (pour le parallax mapping)
   if (tex_coords.x > 1.0 || tex_coords.y > 1.0 || tex_coords.x < 0.0 || tex_coords.y < 0.0)
     discard;
 
-  // Récupération de la normale depuis la normal map
+  // Récupération de la normale depuis la normal map pour adapter les normales à chaque fragment et non pas à la surface 
   vec3 normal = texture(normal_tex, tex_coords).xyz;
   normal = normalize(normal * 2.0 - 1.0); // passe de 0->1 à -1->1
 

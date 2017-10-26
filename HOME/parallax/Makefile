@@ -4,9 +4,11 @@ BUILD   := build
 SOURCES := lib src
 INCLUDE := lib
 
-CXXFLAGS = -Wall -Wextra -O2 -g -std=c++11
+CXXFLAGS += -Wall -Wextra -O2 -ggdb3 -I../src/math -std=c++11
+LDFLAGS += -lglut -lGLEW -lGL  -L/usr/lib/nvidia-375 -pthread
+
 CPPFLAGS = $(foreach dir,$(INCLUDE),-I../$(dir))
-LDFLAGS  = -lglut -lGLEW -lGL -pthread
+
 ##############################################################################
 .SUFFIXES:
 .SECONDARY:
