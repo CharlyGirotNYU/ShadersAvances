@@ -35,17 +35,16 @@
 
 \section{Parallax Mapping - Donner l'illusion du relief}
 \subsection{Utilisation des textures de normales}
-Habituellement, nous utilisons des textures \textit{colorées} appliquées directement sur un maillage. Exemple : dessiner un mur de briques comme sur la Fig.\ref{briques}
+\textbf{Avant} : utilisation de textures \textit{colorées} appliquées directement sur un maillage. Exemple : dessiner un mur de briques comme sur la Fig.\ref{briques}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.3\textwidth]{figures/brick_diffuse.png}
-\caption{Texture colorée de briques}
-\label{briques}
+\includegraphics[width=0.3\textwidth]{figures/brick_diffuse.png}\label{briques}
+\caption{Images à reconstruire sous la forme d'un panorama}
 \end{figure}
 
 
-Dans ce TP, nous souhaitons utiliser des textures contenant d'autres informations afin de les utiliser pour modifier des caractéristiques de nos images 3D comme les normales sur la Fig.\ref{normales}, ou pour simuler un effet de profondeur comme sur la Fig.\ref{profondeur} dans le but d'avoir un rendu plus réaliste.
+\textbf{Désormais} : utilisation des textures pour d'autres informations et utilisations (modifications de normales Fig\ref{normales}, stockage d'informations de profondeurs Fig\ref{profondeur}). 
 
 \begin{figure}[H]
 \centering
@@ -55,15 +54,7 @@ Dans ce TP, nous souhaitons utiliser des textures contenant d'autres information
 \end{figure}
 
 
-Dans un premier temps, on nous fournit un programme qui implémente le normal mapping, dont le résultat est présenté Fig.\ref{NormalesResult}. Cette méthode permet de simuler graphiquement des détails géométriques sur les surfaces représentées. En effet, dans cette méthode, les normales ne sont plus seulement orientées selon l'axe principal $z$ de la surface mais sont désormais liées aux axes $x$,$y$ et $z$ de la surface en fonction de la carte des normales représentée Fig.\ref{normal} où la composante rouge indique une orientation de la normale modifiée selon l'axe $x$, verte pour l'axe $y$ et bleue pour l'axe $z$. Les normales ne sont ainsi plus toutes orientées dans le même sens selon la surface de l'objet, mais orientées différemment selon chaque fragment constituant notre objet comme schématisé Fig.\ref{normalOrientation}. On obtient ainsi grâce aux nouvelles orientations de normales, des surfaces contenant plus de détails et donc une impression de relief et un réalisme supérieure comparée à la Fig.\ref{noNormalesResult}.
-
-
-\begin{figure}[H]
-\centering
-\subfigure[]{\label{noNormalesResult} \includegraphics[width=0.3\textwidth]{figures/noNormalMapping.png}}
-\subfigure[]{\label{NormalesResult} \includegraphics[width=0.3\textwidth]{figures/normalMapping.png}}
-\caption{Résultat de l'application de texture couleur (a) auquel on applique la gestion des normales (b)}
-\end{figure}
+Dans un premier temps, on nous fourni un programme qui implémente le normal mapping. On peut remarquer que la lumière est fixe mais les ombres évoluent en fonction de la rotation de l'objet. Il est possible de distinguer un relief entre les briques et leur support (le mur). Cela provient du fait que dans la méthode normal mapping les normales ne sont plus seulement orientés vers nous selon l'axe $z$ mais sont désormais liées aux axes $x$,$y$ et $z$ de la surface en fonction de la carte des normales representée Fig\ref{normales} où la composante rouge indique une modification de la normale selon l'axe $x$, verte pour l'axe $y$ et bleue pour l'axe $z$. Les normales ne sont ainsi plus toutes orientées dans le même sens selon la surface de l'objet, mais orientées différemment selon chaque fragment constituant notre objet. On obtient ainsi grâce à l'illumination des surfaces beaucoup plus détaillés.
 
 \begin{figure}[H]
 \centering
@@ -73,51 +64,51 @@ Dans un premier temps, on nous fournit un programme qui implémente le normal ma
 
 
 
-Lors de l'application d'un normal mapping, lorsque la carte des normales possèdent majoritairement des normales selon un axe, il faut que la normale interpolée de la surface soit de même direction. Si tel n'est pas le cas, on se retrouve alors avec un problème d'illumination  comme le montre la Fig.\ref{lighting_problem}. En effet les normales ont étés calculés pour chaque fragment selon la carte des textures et non pas selon l'orientation de la normale surfacique. \\
+Dans cette méthode, les tangeantes bi-tangeantes sont calculées dans l'espace TBN (Tangeante, Bitangeante, Normal). Dans cet espace les normales pointent toujours approximativement vers la direction z positive. La direction initiale est alors indépendante de l'orientation du plan initial. Après avoir appliqué une transformation sur notre plan, nous pouvons en utilisant une matrice spécifique transformer les vecteurs normaux initiales en les orientant le long de la direction de la surface cartographiée finale grâce à l'indépendance de la direction initiale par rapport à l'orientation du plan initial.
 
-Pour résoudre ce problème d'illumination selon les normales, on se place dans l'espace TBN (tangentes, bitangentes, Normales) de chaque triangle. Dans cet espace, les normales y sont calculés dans ce qui se trouve être un espace local pour chaque triangle. Les normales calculées et modifiées par la carte des hauteurs pointent alors toutes approximativement dans la direction z de chaque triangle peut importe l'orientation finale de l'objet. Il est alors possible de transformer les normales depuis l'espace local tangent vers l'orientation finale de la surface. 
+Pour simplifier nous aurions pu utiliser un simple normal mapping en orientant simplement la texture des normales selon la map. Les normales pointeraient alors vers en direction du plan normal du plan. Néanmoins, cela pose le problème suivant : il faut que les vecteurs normaux (qui pointent tous dans la même direction) et que la surface normale du plan auquel on applique la texture pointent dans la même direction pour obtenir un effet d'éclairage réaliste. Lorsque nous effectuons une transformation sur la position du plan normal, les vecteurs normaux ont été calculée selon une direction (celle de la map initiale) et donc pointeront toujours dans la même direction et pas en fonction de l'orientation du plan normal de la map transformée . L'éclairage n'aura donc pas l'air juste comme le montre la Fig \ref{lighting_problem}
 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.5\textwidth]{figures/lighting_problem.png}\label{lighting_problem}
-\caption{Problème d'orientation des normales pour l'éclairage lors d'un normal mapping classique - tiré de :  https://learnopengl.com/\#!Advanced-Lighting/Normal-Mapping}
+\includegraphics[width=0.5\textwidth]{figures/lighting_problem.PNG}\label{lighting_problem}
+\caption{•}
 \end{figure}
 
+Dans ce programme, nous souhaitons pouvoir utiliser plusieurs texture avec d'autres informations d'utilisations comme la modification des normales et le stockage d'informations de profondeurs. Chaque texture sera stockée dans un indice GLTEXTUREn. En lisant le buffer courant activée et en sélectionnant la texture grâce à glActiveTexture(GLTEXTUREn)   nous pouvons relier la cible à la texture à l'aide glbindtexture(). Cela nous permet donc de pouvoir "jongler" entre les différentes structures. La fonction glActiveTexture(GLTEXTUREn) sélectionne la texture que les appels suivants affecteront jusqu'à l'activation d'une autre texture.
 
-Pour pouvoir utiliser la méthode de normal mapping, puis ensuite la méthode de parallax que nous allons détailler par la suite, il faut utiliser de nombreuses variables  pour pouvoir calculer la matrice TBN et ensuite calculer les directions de la vue et de la lumière dans nos shaders.
-Dans le Vertex Shader nous avons besoin des : \\
-- sommets habituels : in vec3 position \\
-- données des normales : in vec3 normal \\
-- coordonnées de textures : in vec2 $tex_coords$b\\
-- tangeantes et bitangeantes calculés precedemment : in vec3 tangent; in vec3 bitangent
+Q3\\  
+Rôle de chaque variable dans les shaders Vertex Shader : \\
+- in vec3 position; Sommet habituels \\
+- in vec3 normal; Normal données \\
+- in vec2 $tex_coords$; Coordonées de texture \\
+- in vec3 tangent; in vec3 bitangent; Tangeante et bitangeante - - calculés précédemment 
  \\
 
-On calcule  alors la matrice TBN pour passer de l'espace local tangent vers l'orientation finale de la surface, avec les lignes de codes suivantes :\\ 
+On calcule la matrice TBN avec les lignes de codes suivantes :\\ 
 out vec3 $vf\_frag\_pos$ = model * position ;\\
 out vec2 $vf\_tex_coords$;\\
 out vec3 $vf\_tangent\_light\_pos$ = TBN * $light\_pos$;\\
 out vec3 $vf\_tangent\_view\_pos$ = TBN * $view\_pos$;\\
 out vec3 $vf\_tangent\_frag\_pos$ = TBN * $vf\_frag_pos$;\\
 
-
-
-
-\subsection{Ajout d'un effet de profondeur avec l'utilisation des cartes de hauteur}
-Le normal mapping nous a permis d'obtenir un niveau de détails supplémentaire sur nos textures. Avec peu de données supplémentaires, il est possible de donner une véritable impression de relief en réalisant un Parallax Mapping. Pour cela nous allons utiliser une carte de hauteur afin de modifier par projection les coordonnées de textures à afficher. On utilisera donc dans les shaders une variable supplémentaire $height\_tex$ afin de connaître l'élévation correspondante à chaque coordonnées de textures.Cette méthode simule une impression de relief. \\
-
-Supposons que nous sommes à une position $view\_pos$ et regardons vers la position $frag\_pos$ comme indiqué Fig.\ref{parallaxtheory}. Le point réel observé ne devrait pas être $frag\_pos$ correspondant à la coordonnée de texture de départ mais le point C. Il faut alors calculer le point C par projection, ce qui s’avérerait trop complexe. Pour simplifier le problème on cherche alors la position du point P par calcul de l'offset entre le point A ($frag\_pos$) et la projection approximative du point B sur la surface en utilisant la hauteur au point A. Le résultat de cette méthode est présenté Fig.\ref{ParallaxResult}.
-
-\textbf{Pourquoi ça marche mieux quand on a vue rasante. on applique ensuite l'algorithme suivant pour ajouter l'effet de profondeur}
+Fragment Shader : en fonction de la direction de la lumière, de la vue et des fragments tangeants on peut calculer les directions de la vue et de la lumière 
+En fonction des différentes textures envoyées (couleur (diffuse) et normales) et des coordonnées de texture, on peut calculer la couleur des fragments.
+Les variables vf sont exprimées dans l'espace TBN (donc liées à la surface de l'objet). 
+On utilise pas height tex car on fait du normal mapping pas du parallax mapping (pas encore).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/parallax.png}
-\label{parallaxtheory}
-\caption{aaa}
+\subfigure[]{\label{noNormalesResult} \includegraphics[width=0.3\textwidth]{figures/noNormalMapping.png}}
+\subfigure[]{\label{NormalesResult} \includegraphics[width=0.3\textwidth]{figures/normalMapping.png}}
+\caption{Résultat de l'application de texture couleur (a) auquel on applique la gestion des normales (b)}
 \end{figure}
 
 
+\subsection{Ajout d'un effet de profondeur avec l'utilisation des cartes de hauteur}
+Modification des coordonnées de texture en fonction de la carte d'élévation et de la position de la vue. Explication géométrique de ce qu'on fait pour que donner cet effet de profondeur et du pourquoi ça marche mieux quand on a une vue rasante. 
+
+On applique ensuite l'algorithme suivant pour ajouter l'effet de profondeur : 
 
 
 \begin{figure}[H]
@@ -127,18 +118,19 @@ Supposons que nous sommes à une position $view\_pos$ et regardons vers la posit
 \caption{Comparaison de la gestion des normales (a) auquel on applique une carte de hauteur (b)}
 \end{figure}
 
-Néanmoins, lors du calcul de nos hauteurs nous utilisons un facteur qui permet d'augmenter ou diminuer les hauteurs des coordonnées de nos textures. Si ce facteur est trop petit ou trop grand le rendu ne parait plus réaliste. En effet, l'offset entre les coordonnées de texture réels et les modifiées devient trop important. La surface supérieure des briques semble alors se séparer du mur, ce qui provoque une perte complète du réalisme de la scène.
 
+Critique des limitations du parallax mapping.
 \begin{figure}[H]
 \centering
-\subfigure[]{\label{ParallaxResult1} \includegraphics[width=0.3\textwidth]{figures/parallax2.png}}
-\subfigure[]{\label{ParallaxResult2} \includegraphics[width=0.3\textwidth]{figures/parallax3.png}}
+\subfigure[]{\label{normalResult} \includegraphics[width=0.3\textwidth]{figures/parallax2.png}}
+\subfigure[]{\label{ParallaxResult} \includegraphics[width=0.3\textwidth]{figures/parallax3.png}}
 \caption{Résultats de la carte des profondeurs pour un facteur de hauteur trop faible (a) trop haut (b)}
 \end{figure}
 
 
 \section{Marching Cubes}
 
+%% En vrai je sais pas si faut vraiment répondre aux question une par une, c'est trop bizarre et j'ai même pas l'impression qu'il y ait de lien entre les questions ... 
 \subsection{Présentation Générale}
 
 Une surface pourrait être décrite par une fonction densité qui à chaque point 3D associe une valeur de densité. Une valeur positive de densité correspondrait à un point de la surface solide et une valeur négative à un espace vide. Grâce au GPU, nous allons générer des "blocs" de terrain, et les subdiviser en sous-blocs de 32x32x32 appelés voxels. Chaque sommet de ce sous-bloc possède une valeur de densité. L'algorithme de marching cubes nous permet de générer les polygones corrects dans chaque voxels en fonction de la valeur de densité de chaque coin.
