@@ -41,14 +41,32 @@ vec4 Noise_MQ_signed(vec3 uvw, sampler3D noiseTex)
   return Noise_LQ_signed(uvw2, noiseTex);
 }
 
-float density(vec3 ws)
-{ // C'est cette fonction qui définit la "forme"
+float density_cylinder(vec3 ws)
+{
+    return 1. - length(ws); //CYLINDER
+}
+
+float density_torus(vec3 ws, vec2 t)
+{
+    vec2 q = vec2(length(ws.xz)-t.x,ws.y); // TORUS
+    float f = length(q)-0.5*t.y;
+    vec3 a; vec3 b; float r;
+    r=1.0;
+    a = vec3(1.0,0.0,0.5);
+    b = vec3(-0.5,1.0,0.5);
+    vec3 pa = ws - a, ba = b - a;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    return length( pa - ba*h ) - r;
+}
+
+float density_perso(vec3 ws)
+{
     float f = 0;
     
      ws.yz   += 0.5*Noise_MQ_unsigned(ws/10,noiseVol0).xy 
 	    + 0.5*Noise_MQ_unsigned(ws/10,noiseVol1).xy
 	    + 0.5*Noise_MQ_unsigned(ws/10,noiseVol2).xy
-	    + 0.0*Noise_MQ_unsigned(ws/10,noiseVol3).xy;
+	    + 0.3*Noise_MQ_unsigned(ws/10,noiseVol3).xy;
     vec2 pillar[4];
     
     pillar[0] = vec2(0.4,-0.8);
@@ -60,20 +78,29 @@ float density(vec3 ws)
     
     for(int k=0; k<4; k++)
     {
-      f += 1 / length(ws.xy - pillar[k].xy) - 1;
+      f += 1 / length(ws.xy - pillar[k].xy) -1;
     }
-    f -= 1 / length(ws.xy) - 2;
-    f = f - pow(length(ws.xy), 3);
+    f -= 1 / length(ws.xy) - 3;
+    f = f - 2*pow(length(ws.xy), 3);
     
-    vec2 v = vec2(cos(ws.z),sin(ws.z));
+    vec2 v = vec2(cos(ws.z),3*sin(ws.z));
     f += dot(v,ws.xy);
     
-    f += cos(ws.z);
+    f += 5*cos(ws.z);
     
     return f;
+}
     
-
-    //return 1. - length(ws);
+float density(vec3 ws)
+{ 
+    float f =0;
+    float f_cylinder = density_cylinder(ws);
+    float f_torus = density_torus(ws,vec2(0.5,0.5));
+    float f_perso = density_perso(ws);
+    
+    f = f_perso;
+    
+    return f;   
 }
 
 uniform vec3 offset;
