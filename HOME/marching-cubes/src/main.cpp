@@ -521,7 +521,12 @@ static void init()
 
   compute_density_pass_init();
   glActiveTexture(GL_TEXTURE0);
-  image = image_load_tga("textures/texture.tga");
+  
+  // Load textures
+//   image = image_load_tga("textures/texture.tga");// texture type rocher
+  image = image_load_tga("textures/textureb.tga"); //texture type brique
+
+  
   if (image)
   {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -547,7 +552,7 @@ static void init()
   marching_cube_gpu_setup();
 
   glClearColor(.6, .7, .8, 0); // Fond Bleu
-  //lClearColor(0, 0, 0, 0);//Fond Noir
+  //glClearColor(0, 0, 0, 0);//Fond Noir
   
   glEnable(GL_DEPTH_TEST);
 

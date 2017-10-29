@@ -46,6 +46,8 @@ float cubeVal(int i){
 }
 
 //Compute interpolated vertex along an edge
+// v0, v1 : positions des sommets
+// l0, l1 : densité des sommets v0 et v1
 vec3 vertexInterp(vec3 v0, float l0, vec3 v1, float l1)
 {
   // À modifier pour une vraie interpolation
@@ -54,6 +56,7 @@ vec3 vertexInterp(vec3 v0, float l0, vec3 v1, float l1)
 }
 
 // Compute Density at vertex of position pos
+// pos : position du voxel courant
 float text_density(vec3 pos)
 {
   return texture(dataFieldTex, (pos + 1.0) / 2.0).r;

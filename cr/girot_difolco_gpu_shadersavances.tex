@@ -15,6 +15,7 @@
 \usepackage{xcolor}
 \usepackage[]{float}
 \usepackage{tikz}
+\usepackage{listings}
 \title{Compte Rendu - TP ETI5-IMI \\ \textit{Shaders avancés et Marching Cubes}}
 \author{Di Folco Maxime - Girot Charly}
 \date{27/10/2017}
@@ -141,56 +142,73 @@ Néanmoins, lors du calcul de nos hauteurs nous utilisons un facteur qui permet 
 
 \subsection{Présentation Générale}
 
-Une surface pourrait être décrite par une fonction densité qui à chaque point 3D associe une valeur de densité. Une valeur positive de densité correspondrait à un point de la surface solide et une valeur négative à un espace vide. Grâce au GPU, nous allons générer des "blocs" de terrain, et les subdiviser en sous-blocs de 32x32x32 appelés voxels. Chaque sommet de ce sous-bloc possède une valeur de densité. L'algorithme de marching cubes nous permet de générer les polygones corrects dans chaque voxels en fonction de la valeur de densité de chaque coin.
+L'algorithme des \textit{marchings cubes} à pour but d'extraire des meshs à partir d'un ensemble de points de l'espace, définit comme un champ scalaire ou à chacun des points 3D est associé sa densité. Une valeur positive de densité correspond à un point de la surface solide et une valeur négative à un espace vide. Grâce au GPU, l'espace est subdiviser en 3*3*8 blocs de 48*48*48 blocs élementaires (voxels) reprensentés par des cubes. C'est au sein de chacun des cubes que l'algorithme remplace et il faut alors distinguer 256 ($2^8$ : 8 angles pour le cube) cas différents : 
+\begin{itemize}
+\item Cas 0 : Les 8 angles du cube sont de densité négative : le cube est complètement en dehors de la surface => Rien à dessiner.
+\item Cas $ 1 \to 254$ : Au moins un des 8 angles n'est pas de même signe que les autres : On cherche alors au sein d'une table de correspondance pour savoir combien de polygones seront générées au sein du cube et comment les construire. La Fig.\ref{marchingCubes} présente les principaux cas possibles parmi les 256 possibles. 
+\item Cas 255 : Les 8 angles du cube sont de densité positive : le cube est completement à l'intérieur de la surface => Rien à dessiner puisqu'on ne represente graphiquement que les bordures d'une surface. 
 
-%% PEut etre mettre une figure qui illustre ca 
+\end{itemize}
 
-Question 5 : Repérez quel groupe de shaders et quelle partie du code C++ sont liés à chaque étape. Essayez de faire un
-schéma indiquant comment les différentes étapes echangent des données via des FBO ou des TF.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/marchingCubes.png}
+\label{marchingCubes}
+\caption{Illustration des principaux cas possibles pour la representation des polygones avec l'algorithme des marchings cubes}
+\end{figure}
 
-\begin{center}
-\begin{tikzpicture}
+La Fig.\ref{pipeline} montre l'enchainement des différents shaders pour la réalisation des marchings cubes. \textit{Ca serait cool si on pouvait juste dire les quels échangent via des FBO et lesquels via des TF (je pense que c'est ca qu'on comprenait pas l'autre jour)}
 
-
-\draw[step=0.5cm,white,very thin] (-6,-5) grid (6,10) ;
-\fill[blue!40!white] (-2,10) rectangle (2,9);
-\node[above] at (0,9.25){Build Density Verrtex};
-
-
-
-\fill[blue!40!white] (-2,8.5) rectangle (2,7.5) ;
-\node[above] at (0,7.75){Build Density Geometry };
-
-\fill[blue!40!white] (-2,7) rectangle (2,6);
-\node[above] at (0,6.25){Build Density Fragment };
-
-
-\fill[blue!40!white] (-2,5.5) rectangle (2,4.5);
-\node[above] at (0,4.75){List triangle vertex };
-
-\fill[blue!40!white] (-2,4) rectangle (2,3);
-\node[above] at (0,3.25){List Triangle geom};
-
-\fill[blue!40!white] (-2,2.5) rectangle (2,1.5);
-\node[above] at (0,1.75){List Triangle fragment };
-
-\fill[blue!40!white] (-2,1) rectangle (2,0);
-\node[above] at (0,0.25){Generer Vertices Vertex };
-
-\fill[blue!40!white] (-2,-0.5) rectangle (2,-1.5);
-\node[above] at (0,-1.25){Generer Vertices Geom};
-
-\fill[blue!40!white] (-2,-2) rectangle (2,-3);
-\node[above] at (0,-2.75){Gen Vertices Fragment };
-
-\fill[blue!40!white] (-2,-3.5) rectangle (2,-4.5);
-\node[above] at (0,-4){Render Vertex  };
-\node[above] at (0,-4.5){+ Render Fragment};
-
-
-\node[above] at (0,-5){Ordre d'utilisation des shaders - Ajouter Fleches et explications };
-\end{tikzpicture}
-\end{center}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/pipeline3.png}
+\label{pipeline}
+\caption{Pipeline pour la réalisation de l'algorithme marching cubes avec explications des blocs principaux}
+\end{figure}
+%
+%\begin{center}
+%\begin{tikzpicture}
+%
+%
+%\draw[step=0.5cm,white,very thin] (-6,-5) grid (6,10) ;
+%\fill[blue!40!white] (-2,10) rectangle (2,9);
+%\node[above] at (0,9.25){Build Density Verrtex};
+%
+%
+%
+%\fill[blue!40!white] (-2,8.5) rectangle (2,7.5) ;
+%\node[above] at (0,7.75){Build Density Geometry };
+%
+%\fill[blue!40!white] (-2,7) rectangle (2,6);
+%\node[above] at (0,6.25){Build Density Fragment };
+%
+%
+%\fill[blue!40!white] (-2,5.5) rectangle (2,4.5);
+%\node[above] at (0,4.75){List triangle vertex };
+%
+%\fill[blue!40!white] (-2,4) rectangle (2,3);
+%\node[above] at (0,3.25){List Triangle geom};
+%
+%\fill[blue!40!white] (-2,2.5) rectangle (2,1.5);
+%\node[above] at (0,1.75){List Triangle fragment };
+%
+%\fill[blue!40!white] (-2,1) rectangle (2,0);
+%\node[above] at (0,0.25){Generer Vertices Vertex };
+%
+%\fill[blue!40!white] (-2,-0.5) rectangle (2,-1.5);
+%\node[above] at (0,-1.25){Generer Vertices Geom};
+%
+%\fill[blue!40!white] (-2,-2) rectangle (2,-3);
+%\node[above] at (0,-2.75){Gen Vertices Fragment };
+%
+%\fill[blue!40!white] (-2,-3.5) rectangle (2,-4.5);
+%\node[above] at (0,-4){Render Vertex  };
+%\node[above] at (0,-4.5){+ Render Fragment};
+%
+%
+%\node[above] at (0,-5){Ordre d'utilisation des shaders - Ajouter Fleches et explications };
+%\end{tikzpicture}
+%\end{center}
 
 
 \subsection{Analyse Du code}
@@ -214,11 +232,41 @@ TexelFetch recherche le texel (pixel de texture) correspondant à la coordonnée
 Question 9 : Corrigez le calcul des normales en supposant que sa direction est donnée par le gradient de la fonction de
 densité. Quel fichier avez-vous modifié pour cela ?
 
+Jusqu'a présent le calcul de normales pour chaque triangle était constant (chaque polygone possède la même normale). On choisit alors d'intérpoler  les normales pour chaque triangle en fonction du gradient de la fonction de densité en chaque point, le résultat est présenté Fig.\ref{mcNormalResult}. 
+
+\begin{lstlisting}[language=C++,
+                   directivestyle={\color{black}}
+                   emph={int,char,double,float,unsigned},
+                   emphstyle={\color{blue}}
+                  ]]
+// pos : position du voxel courant
+vec3 calc_normal(vec3 pos)
+{
+  vec3 grad = vec3(1.);   // Ancienne normale 
+  float d = 1.0/48.0;     // Ecart entre deux fragments pour calcul du gradient
+  // Calcul du gradient dans les 3 directions x,y,z
+  grad.x = text_density( pos + vec3( d, .0, .0)) - text_density( pos+ vec3(-d, .0, .0));
+  grad.y = text_density( pos + vec3( .0, d, .0)) - text_density( pos+ vec3( .0,-d, .0));
+  grad.z = text_density( pos + vec3( .0, .0, d)) - text_density( pos+ vec3( .0, .0,-d));
+  return normalize(grad);
+}
+\end{lstlisting}
+
+On cherche encore a amélioré le résultat en interpolant correctement les sommets des points sur chaque arrête. En effet ils étaient précédemment toujours calculés au milieu des arrêtes du cube sans tenir compte de la densité de chaque sommet, ce qui à pour effet de rendre une sphère avec un aspect crénelé. On choisit alors d'interpoler linéairement et le résultat est présenté Fig.\ref{mcInterResult} : 
+\begin{lstlisting}[language=C++,
+                   directivestyle={\color{black}}
+                   emph={int,char,double,float,unsigned},
+                   emphstyle={\color{blue}}]]
+// v0, v1 : positions des sommets
+// l0, l1 : densite des sommets v0 et v1
+vec3 vertexInterp(vec3 v0, float l0, vec3 v1, float l1)
+{
+  // return (v0 + v1) / 2; // Ancienne interpolation
+  return (l1*v0 - l0*v1)/(l1-l0); // Interpolation lineaire
+}
+\end{lstlisting}
 
 
-L’aspect crénelé de la sphère vient du fait que la position des vertex est toujours choisie au milieu des arètes des cubes.
-Une meilleure approche consiste à réaliser une interpolation linéraire pour choisir cette position.
-Question 10 : Réalisez cette interpolation de manière à obtenir une sphère bien lisse comme celle de la figure 9.
 
 \begin{figure}[H]
 \centering
@@ -231,21 +279,149 @@ Question 10 : Réalisez cette interpolation de manière à obtenir une sphère b
 
 \subsection{Fonction de densité}
 
-Images des différentes fonctions de densité qu'on peut réaliser + celle de la plus intéressante qu'on ait 
+Avec le nouveau calcul des normales et les interpolations des sommets corrects, il est désormais intéressant de générer des structures plus chaotique, plus aléatoire, plus intéressantes. On s'inspire alors de l'algorithme de calcul de la densité présenté par NVidia : "Cascades par Ryan Geiss et Michael Thompson". On présente nos différents résultat de fonctions de densité tout d'abord pour des fonctions de densité simple (Sphère, Torus Fig.\ref{sphere} et \ref{torus}) puis par utilisation de l'algorithme NVidia Fig\ref{rock}. On fais également varier certains paramètres de cet algorithme (comme suit) pour obtenir notre résultat final Fig.\ref{rockf} avec ou sans bruit.
+
+\begin{lstlisting}[language=C++,
+                   directivestyle={\color{black}}
+                   emph={int,char,double,float,unsigned},
+                   emphstyle={\color{blue}}]]
+                   
+/** Return a density function to create a self-shaped rock  */
+float density_perso(vec3 ws)
+{
+    //ws coordinates UV of fragments
+     float f = 0; // density function
+     
+    //Add noise to fragments so the result isn't flat but irregular
+     ws.yz   += 0.5*Noise_MQ_unsigned(ws/10,noiseVol0).xy 
+	    + 0.5*Noise_MQ_unsigned(ws/10,noiseVol1).xy
+	    + 0.5*Noise_MQ_unsigned(ws/10,noiseVol2).xy
+	    + 0.3*Noise_MQ_unsigned(ws/10,noiseVol3).xy;
+    
+    //Create 4 pillar center in a xy plane (NB : xy OpenGL = xz in most of the case)
+    vec2 pillar[4];
+    pillar[0] = vec2(0.4,-0.8);
+    pillar[1] = vec2(0.4,1.0);
+    pillar[2] = vec2(-0.8,-0.4);
+    pillar[3] = vec2(-0.4,1.0);
+
+    
+    for(int k=0; k<4; k++)
+    {
+      f += 1 / length(ws.xy - pillar[k].xy) -1; // add positive value at pillar
+    }
+    f -= 1 / length(ws.xy) - 3; //Add negative values going down the center (water flow channel)
+    f = f - 2*pow(length(ws.xy), 3); // Add strong negative values at outer edge (Help to keep solid rock in bounds)
+    
+    //Rotate the values as the slice's Z coord changes. 
+    vec2 v = vec2(cos(ws.z),3*sin(ws.z));
+    f += dot(v,ws.xy);
+    
+    //Shelves : periodically add positive values based on slice's Z coord. 
+    f += 5*cos(ws.z);
+    
+    return f;
+}
+\end{lstlisting}
 
 \begin{figure}[H]
 \centering
-\subfigure[]{\label{mc0} \includegraphics[width=0.3\textwidth]{figures/mcnorminterp.png}}
-\subfigure[]{\label{mcNormalResult} \includegraphics[width=0.3\textwidth]{figures/torus.png}}
-\subfigure[]{\label{mcInterResult} \includegraphics[width=0.3\textwidth]{figures/chelouA.png}}
+\subfigure[]{\label{sphere} \includegraphics[width=0.3\textwidth]{figures/mcnorminterp.png}}
+\subfigure[]{\label{torus} \includegraphics[width=0.3\textwidth]{figures/torus.png}}
+\subfigure[]{\label{rock} \includegraphics[width=0.3\textwidth]{figures/chelouA.png}}
 \caption{Marching Cubes avec différentes fonctions de densite : Boule (a), Torus (b), Création de roches (c)}
+\end{figure}
+\begin{figure}[H]
+\centering
+\subfigure[]{\label{rockfnonoise} \includegraphics[width=0.3\textwidth]{figures/finalnonoise.png}}
+\subfigure[]{\label{rockf} \includegraphics[width=0.3\textwidth]{figures/finalDensity.png}}
+\caption{Densité finale retenue non bruitée (a), bruitée (b)}
 \end{figure}
 
 \subsection{Amélioration graphique \& Textures}
 
 
-Question 12 : Mettez en place le calcul pondéré des textures par les normales pour obtenir une image du genre de la
-figure 18.
+
+Le but de cette partie est d'appliquer une texture quelconque à la surface. Or les coordonées de textures n'existe pas et il serait impossible d'en obtenir des cohérentes au préalable étant donné la surface quelconque. Ce sont ainsi les coordonnées spatiales des sommets qui sont utilisées comme coordonnées de textures en ne prenant que deux dimensions sur les 3. Pour ne pas privilégier une seule direction sur laquelle projeté la texture (choisir x et y comme coordonnées de texture reviendrait à projeter la texture selon l'axe z), les deux coordonnées sont choisies par pondération des normales. Les textures sont alors projetés sur l'axe prépondérant et les 2 autres axes sont utilisés comme coordonnées de texture. La Fig.\ref{normalesCouleurs} représente cette affichage avec des couleurs pondérées par les normales : Rouge(x), Vert(y), Bleu(z). 
+
+\begin{figure}[H]
+\centering
+\subfigure[ ]{\label{normal1} \includegraphics[width=0.3\textwidth]{figures/normales1.png}}
+\subfigure[ ]{\label{normal2} \includegraphics[width=0.3\textwidth]{figures/normales2.png}}
+\subfigure[ ]{\label{normal3} \includegraphics[width=0.3\textwidth]{figures/normales3.png}}
+\caption{Application des normales pondérés représentées par le mélange des 3}
+\label{normalesCouleurs}
+\end{figure}
+
+Enfin, on remplace l'affichage couleurs par l'affichage de textures comme suit : 
+
+Code
+
+La Fig.\ref{normalestextures} présente les résultats pour l'application d'une texture brique et l'application d'une texture rocheuse. 
+\begin{figure}[H]
+\centering
+\subfigure[ ]{\label{normalt1} \includegraphics[width=0.45\textwidth]{figures/normalesPondereBrique.png}}
+\subfigure[ ]{\label{normalt2} \includegraphics[width=0.45\textwidth]{figures/normalesTextures.png}}
+\caption{Application des coordonnées de texture par pondération des normales}
+\label{normalestextures}
+\end{figure}
+
+
+Choix de la direction de projection relativement aux normales et définition des coordonées de textures égales aux coordonnées de position : 
+
+\begin{lstlisting}[language=C++,
+                   directivestyle={\color{black}}
+                   emph={int,char,double,float,unsigned},
+                   emphstyle={\color{blue}}]]
+vec2 coord_tex;
+vec3 test_color;
+
+if(abs(vf_normal.x) > abs(vf_normal.y) && abs(vf_normal.x) > abs(vf_normal.z))
+  {
+    coord_tex = vf_position.yz;
+//     test_color = vec3(1.5*vf_normal.x, vf_normal.y, vf_normal.z);//Ponderation de la couleur selon la direction principale pour un rendu plus naturel
+  }
+  else if(abs(vf_normal.y) > abs(vf_normal.x) && abs(vf_normal.y) > abs(vf_normal.z))
+  {
+    coord_tex = vf_position.xz;
+//     test_color = vec3(vf_normal.x, 1.5*vf_normal.y, vf_normal.z);//Ponderation de la couleur selon la direction principale pour un rendu plus naturel
+  }
+  else
+  {
+    coord_tex = vf_position.xy;
+//     test_color = vec3(vf_normal.x, vf_normal.y, 1.5*vf_normal.z); //Ponderation de la couleur selon la direction principale pour un rendu plus naturel
+  }
+   test_color = 5*vec3(vf_normal.x, vf_normal.y, vf_normal.z); //Couleur melangeant les 3 vues des normales 
+                   
+\end{lstlisting}
+
+Définition de la couleur d'après les nouvelles normales : 
+\begin{lstlisting}[language=C++,
+                   directivestyle={\color{black}}
+                   emph={int,char,double,float,unsigned},
+                   emphstyle={\color{blue}}]]
+ 
+float blend_weights = abs(100)-0.2;
+blend_weights *=7;
+blend_weights = pow(blend_weights, 3);
+blend_weights = max(0,blend_weights);
+blend_weights /= dot(blend_weights,1);
+  
+const float freq = 0.17;
+//vec4 texcolor = vec4(1.0,0.,0.,1.0); // Affichage du volume en rouge
+//vec4 texcolor = vec4(blend_weights*test_color,1); //Affichage du volume avec couleurs par normales ponderees
+vec4 texcolor = texture(blend_weights*myTexture, coord_tex); // Affichage du volume avec texture    
+...
+color =  occ_light * occ_light * (blended_color * 0.2 + 0.6 * diffuse + 0.3 * vec4(vec3(specular), 1.0));              
+\end{lstlisting}
+
+Finalement la dernière étape est l'application de l'occlusion de la lumière permettant de savoir quelle quantité de lumière, en chaque point, reste bloqué dans la texture ou parviennent à la caméra. Cela permet un rendu plus naturelle des ombres comme montré Fig.\ref{occlusion}.
+\begin{figure}[H]
+\centering
+\label{normalt1} \includegraphics[width=0.99\textwidth]{figures/final.png}
+\caption{Occlusion de la lumière et rendu final}
+\label{normalestextures}
+\end{figure}
 
 
 
