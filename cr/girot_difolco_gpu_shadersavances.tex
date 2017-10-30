@@ -56,7 +56,7 @@ Dans ce TP, nous souhaitons utiliser des textures contenant d'autres information
 \end{figure}
 
 
-Dans un premier temps, on nous fournit un programme qui implémente le normal mapping, dont le résultat est présenté Fig.\ref{NormalesResult}. Cette méthode permet de simuler graphiquement des détails géométriques sur les surfaces représentées. En effet, dans cette méthode, les normales ne sont plus seulement orientées selon l'axe principal $z$ de la surface mais sont désormais liées aux axes $x$,$y$ et $z$ de la surface en fonction de la carte des normales représentée Fig.\ref{normal} où la composante rouge indique une orientation de la normale modifiée selon l'axe $x$, verte pour l'axe $y$ et bleue pour l'axe $z$. Les normales ne sont ainsi plus toutes orientées dans le même sens selon la surface de l'objet, mais orientées différemment selon chaque fragment constituant notre objet comme schématisé Fig.\ref{normalOrientation}. On obtient ainsi grâce aux nouvelles orientations de normales, des surfaces contenant plus de détails et donc une impression de relief et un réalisme supérieure comparée à la Fig.\ref{noNormalesResult}.
+Dans un premier temps, on nous fournit un programme qui implémente le normal mapping, dont le résultat est présenté Fig.\ref{NormalesResult}. Cette méthode permet de simuler graphiquement des détails géométriques sur les surfaces représentées. En effet, dans cette méthode, les normales ne sont plus seulement orientées selon l'axe principal $z$ de la surface mais sont désormais liées aux axes $x$,$y$ et $z$ de la surface en fonction de la carte des normales représentée Fig.\ref{normales} où la composante rouge indique une orientation de la normale modifiée selon l'axe $x$, verte pour l'axe $y$ et bleue pour l'axe $z$. Les normales ne sont ainsi plus toutes orientées dans le même sens selon la surface de l'objet, mais orientées différemment selon chaque fragment constituant notre objet comme schématisé Fig.\ref{normalFrag}. On obtient ainsi grâce aux nouvelles orientations de normales, des surfaces contenant plus de détails et donc une impression de relief et un réalisme supérieure comparée à la Fig.\ref{noNormalesResult}.
 
 
 \begin{figure}[H]
@@ -68,21 +68,22 @@ Dans un premier temps, on nous fournit un programme qui implémente le normal ma
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.5\textwidth]{figures/normalsOrientation.png}\label{normalOrientation}
+\includegraphics[width=0.5\textwidth]{figures/normalsOrientation.png}
 \caption{Principe de l'orientation des normales en parallax mapping - tiré de :  https://learnopengl.com/\#!Advanced-Lighting/Normal-Mapping}
+\label{normalFrag}
 \end{figure}
 
 
 
-Lors de l'application d'un normal mapping, lorsque la carte des normales possèdent majoritairement des normales selon un axe, il faut que la normale interpolée de la surface soit de même direction. Si tel n'est pas le cas, on se retrouve alors avec un problème d'illumination  comme le montre la Fig.\ref{lighting_problem}. En effet les normales ont étés calculés pour chaque fragment selon la carte des textures et non pas selon l'orientation de la normale surfacique. \\
+Lors de l'application d'un normal mapping avec une carte des normales qui possède majoritairement des normales selon un axe, il faut que la normale interpolée de la surface soit de même direction. Si tel n'est pas le cas, on se retrouve alors avec un problème d'illumination  comme le montre la Fig.\ref{lighting_problem}. En effet les normales ont étés calculés pour chaque fragment selon la carte des textures et non pas selon l'orientation de la normale surfacique. \\
 
-Pour résoudre ce problème d'illumination selon les normales, on se place dans l'espace TBN (tangentes, bitangentes, Normales) de chaque triangle. Dans cet espace, les normales y sont calculés dans ce qui se trouve être un espace local pour chaque triangle. Les normales calculées et modifiées par la carte des hauteurs pointent alors toutes approximativement dans la direction z de chaque triangle peut importe l'orientation finale de l'objet. Il est alors possible de transformer les normales depuis l'espace local tangent vers l'orientation finale de la surface. 
+Pour résoudre ce problème d'illumination selon les normales, on se place dans l'espace TBN (Tangente, Bitangente, Normale) de chaque triangle. Dans cet espace, les normales y sont calculés dans ce qui se trouve être un espace local pour chaque triangle. Les normales calculées et modifiées par la carte des hauteurs pointent alors toutes approximativement dans la direction z de chaque triangle peut importe l'orientation finale de l'objet. Il est alors possible de transformer les normales depuis l'espace local tangent vers l'orientation finale de la surface. 
 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.5\textwidth]{figures/lighting_problem.png}\label{lighting_problem}
-\caption{Problème d'orientation des normales pour l'éclairage lors d'un normal mapping classique - tiré de :  https://learnopengl.com/\#!Advanced-Lighting/Normal-Mapping}
+\includegraphics[width=0.5\textwidth]{figures/lighting_problem.png}
+\caption{Problème d'orientation des normales pour l'éclairage lors d'un normal mapping classique - tiré de :  https://learnopengl.com/\#!Advanced-Lighting/Normal-Mapping}\label{lighting_problem}
 \end{figure}
 
 
@@ -107,15 +108,14 @@ out vec3 $vf\_tangent\_frag\_pos$ = TBN * $vf\_frag_pos$;\\
 \subsection{Ajout d'un effet de profondeur avec l'utilisation des cartes de hauteur}
 Le normal mapping nous a permis d'obtenir un niveau de détails supplémentaire sur nos textures. Avec peu de données supplémentaires, il est possible de donner une véritable impression de relief en réalisant un Parallax Mapping. Pour cela nous allons utiliser une carte de hauteur afin de modifier par projection les coordonnées de textures à afficher. On utilisera donc dans les shaders une variable supplémentaire $height\_tex$ afin de connaître l'élévation correspondante à chaque coordonnées de textures.Cette méthode simule une impression de relief. \\
 
-Supposons que nous sommes à une position $view\_pos$ et regardons vers la position $frag\_pos$ comme indiqué Fig.\ref{parallaxtheory}. Le point réel observé ne devrait pas être $frag\_pos$ correspondant à la coordonnée de texture de départ mais le point C. Il faut alors calculer le point C par projection, ce qui s’avérerait trop complexe. Pour simplifier le problème on cherche alors la position du point P par calcul de l'offset entre le point A ($frag\_pos$) et la projection approximative du point B sur la surface en utilisant la hauteur au point A. Le résultat de cette méthode est présenté Fig.\ref{ParallaxResult}.
+Supposons que nous sommes à une position $view\_pos$ et regardons vers la position A comme indiqué Fig.\ref{parallaxtheory}. Le point réel observé ne devrait pas être A correspondant à la coordonnée de texture de départ mais le point B. Il faut alors calculer le point B par projection, ce qui s’avérerait trop complexe. Pour simplifier le problème on cherche alors la position du point P par calcul de l'offset entre le point A  et la projection approximative du point B sur la surface en utilisant la hauteur au point A. Le résultat de cette méthode est présenté Fig.\ref{ParallaxResult}.
 
-\textbf{Pourquoi ça marche mieux quand on a vue rasante. on applique ensuite l'algorithme suivant pour ajouter l'effet de profondeur}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/parallax.png}
+\includegraphics[width=0.8\textwidth]{figures/parala.png}
+\caption{Theorie de projection du parallax mapping}
 \label{parallaxtheory}
-\caption{aaa}
 \end{figure}
 
 
@@ -152,18 +152,18 @@ L'algorithme des \textit{marchings cubes} à pour but d'extraire des meshs à pa
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/marchingCubes.png}
-\label{marchingCubes}
+\includegraphics[width=0.5\textwidth]{figures/marchingCubes.png}
 \caption{Illustration des principaux cas possibles pour la representation des polygones avec l'algorithme des marchings cubes}
+\label{marchingCubes}
 \end{figure}
 
-La Fig.\ref{pipeline} montre l'enchainement des différents shaders pour la réalisation des marchings cubes. \textit{Ca serait cool si on pouvait juste dire les quels échangent via des FBO et lesquels via des TF (je pense que c'est ca qu'on comprenait pas l'autre jour)}
+La Fig.\ref{pipeline} montre l’enchaînement des différents shaders pour la réalisation des marchings cubes.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/pipeline3.png}
-\label{pipeline}
+\includegraphics[width=0.7\textwidth]{figures/pipeline3.png}
 \caption{Pipeline pour la réalisation de l'algorithme marching cubes avec explications des blocs principaux}
+\label{pipeline}
 \end{figure}
 %
 %\begin{center}
@@ -211,26 +211,7 @@ La Fig.\ref{pipeline} montre l'enchainement des différents shaders pour la réa
 %\end{center}
 
 
-\subsection{Analyse Du code}
-Question 6 : Lisez la documentation de la fonction glDrawArraysInstanced , que réalise cette fonction ? Aurait-on pu s’en
-passer ? Quelle est l’utilisation plus classique de cette fonction ?
-
-De la même manière que glDrawArrays permet de "dessiner/rendre" une primitive (un triangle dans notre cas), glDrawArraysInstances permet de synthétiser une série instanciée de primitives. On aurait donc pu s'en passer en utilisant glDrawArrays dans une boucle avec itération des indices de chaque primitive (ce qui est fait automatiquement avec cette fonction). 
-
-Question 7 : Comment s’utilise la fonction glActiveTexture ? 
-
-
 \subsection{Amélioration de l'algorithme}
-
-Question 8 : Dans les shaders, on trouve des variables de type isampler2D et d’autres de type sampler2D. Quelle est la
-différence entre ces deux types ?  Que réalise la fonction texelFetch ?
-
-Les documentations font réferences à \textit{g}sampler2d ou g est remplacé par rien, u ou i. Rien signifie que le sampler2D contenant des coordonnées de textures sera exprimé en float, i par des entiers signés et u par des entiers non signés. 
-
-TexelFetch recherche le texel (pixel de texture) correspondant à la coordonnées de texture qui lui a été fournit et à la texture. 
-
-Question 9 : Corrigez le calcul des normales en supposant que sa direction est donnée par le gradient de la fonction de
-densité. Quel fichier avez-vous modifié pour cela ?
 
 Jusqu'a présent le calcul de normales pour chaque triangle était constant (chaque polygone possède la même normale). On choisit alors d'intérpoler  les normales pour chaque triangle en fonction du gradient de la fonction de densité en chaque point, le résultat est présenté Fig.\ref{mcNormalResult}. 
 
@@ -342,7 +323,7 @@ float density_perso(vec3 ws)
 
 
 
-Le but de cette partie est d'appliquer une texture quelconque à la surface. Or les coordonées de textures n'existe pas et il serait impossible d'en obtenir des cohérentes au préalable étant donné la surface quelconque. Ce sont ainsi les coordonnées spatiales des sommets qui sont utilisées comme coordonnées de textures en ne prenant que deux dimensions sur les 3. Pour ne pas privilégier une seule direction sur laquelle projeté la texture (choisir x et y comme coordonnées de texture reviendrait à projeter la texture selon l'axe z), les deux coordonnées sont choisies par pondération des normales. Les textures sont alors projetés sur l'axe prépondérant et les 2 autres axes sont utilisés comme coordonnées de texture. La Fig.\ref{normalesCouleurs} représente cette affichage avec des couleurs pondérées par les normales : Rouge(x), Vert(y), Bleu(z). 
+Le but de cette partie est d'appliquer une texture quelconque à la surface. Or les coordonées de textures n'existe pas et il serait impossible d'en obtenir des cohérentes au préalable étant donné la surface quelconque. Ce sont ainsi les coordonnées spatiales des sommets qui sont utilisées comme coordonnées de textures en ne prenant que deux dimensions sur les 3. Pour ne pas privilégier une seule direction sur laquelle projeté la texture (choisir x et y comme coordonnées de texture reviendrait à projeter la texture selon l'axe z), les deux coordonnées sont choisies par pondération des normales. Les textures sont alors projetés sur l'axe prépondérant et les 2 autres axes sont utilisés comme coordonnées de texture. La Fig.\ref{normalesCouleurs} représente cet affichage avec des couleurs pondérées par les normales : Rouge(x), Vert(y), Bleu(z). 
 
 \begin{figure}[H]
 \centering
@@ -354,8 +335,6 @@ Le but de cette partie est d'appliquer une texture quelconque à la surface. Or 
 \end{figure}
 
 Enfin, on remplace l'affichage couleurs par l'affichage de textures comme suit : 
-
-Code
 
 La Fig.\ref{normalestextures} présente les résultats pour l'application d'une texture brique et l'application d'une texture rocheuse. 
 \begin{figure}[H]
@@ -415,18 +394,18 @@ vec4 texcolor = texture(blend_weights*myTexture, coord_tex); // Affichage du vol
 color =  occ_light * occ_light * (blended_color * 0.2 + 0.6 * diffuse + 0.3 * vec4(vec3(specular), 1.0));              
 \end{lstlisting}
 
-Finalement la dernière étape est l'application de l'occlusion de la lumière permettant de savoir quelle quantité de lumière, en chaque point, reste bloqué dans la texture ou parviennent à la caméra. Cela permet un rendu plus naturelle des ombres comme montré Fig.\ref{occlusion}.
+Finalement la dernière étape est l'application de l'occlusion de la lumière permettant de savoir quelle quantité de lumière, en chaque point, reste bloqué dans la texture ou parviennent à la caméra. Cela permet un rendu plus naturelle des ombres comme montré Fig.\ref{finalRendu}.
 \begin{figure}[H]
 \centering
-\label{normalt1} \includegraphics[width=0.99\textwidth]{figures/final.png}
+\label{normalt1} \includegraphics[width=0.9\textwidth]{figures/final.png}
 \caption{Occlusion de la lumière et rendu final}
-\label{normalestextures}
+\label{finalRendu}
 \end{figure}
 
+\section{Problèmes rencontrés}
 
-
-\subsection{Combinaison Parallax Mapping + Marching Cubes}
-
+- En parallax mapping, il n'a pas été compris pourquoi diviser par la composante z améliore encore les résultats en donnant un relief d’autant plus important que la vue est rasante
+- Nous avons également rencontré des difficultés lors de la tentative d'implémentation du parallax mapping + Marching Cubes qui aurait été intéressante sur le rendu final en raison de la forme de notre volume final. En effet nous n'avons pas réussi à savoir ou placer les informations de parallax (créer un render.geom et utiliser un TF pour calculer les Tangeantes Bitangeants pour chaque triangle ? ). Il serait intéressant à titre personnel de comprendre comment faire cette combinaison.
 
 \bibliographystyle{plain}
 \bibliography{bibliography.bib}
