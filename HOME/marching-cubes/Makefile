@@ -4,6 +4,8 @@ BUILD   := build
 SOURCES := lib src
 INCLUDE := lib
 
+
+
 CXXFLAGS = -Wall -Wextra -O2 -g -std=c++11
 CPPFLAGS = $(foreach dir,$(INCLUDE),-I../$(dir))
 LDFLAGS  = -lglut -lGLEW -lGL -pthread  -L/usr/lib/nvidia-375 
